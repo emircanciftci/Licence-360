@@ -1,0 +1,90 @@
+﻿
+@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+@model List<Licence360.DAL.DB.CustomerLicence>
+
+<div class="invoice p-3 mb-3">
+    <div class="row">
+        <div class="col-12">
+            <h4>
+                <i class="nav-icon fas fa fa-user"></i> Müşteri Detayı
+                <a class="btn btn-warning float-right" href="javascript:history.back()"><i class="fas fa-arrow-left"></i> GERİ</a>
+            </h4>
+        </div>
+    </div>
+    <div class="row m-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-sm-6">
+                <address>
+                    <strong>@Model[0].Customer.CompanyName</strong><br>
+                    @Model[0].Customer.AuthPerson<br>
+                    @Model[0].Customer.Phone<br>
+                    @Model[0].Customer.Email<br>
+                    @Model[0].Customer.Address
+                </address>
+            </div>
+        }
+    </div>
+    <div class="col-12">
+        <table id="myTable" class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Program Adı</th>
+                    <th>Firma Adı</th>
+                    <th>Başlangıç Tarihi</th>
+                    <th>Bitiş Tarihi</th>
+                    <th>URL</th>
+                    <th>Durumu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ID</td>
+                        <td>@item.Product.ProductName + @item.Product.LicenceTime.LicenceTimeName Ay</td>
+                        <td>@item.Customer.CompanyName</td>
+                        <td>@item.StartDate.Value.ToShortDateString()</td>
+                        <td>@item.EndDate.Value.ToShortDateString()</td>
+                        <td>@item.CustomerURL</td>
+                        <td>
+                            @if (item.IsActive == true)
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-success">Aktif</span></a>
+                            }
+                            else
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-danger">Pasif</span></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+@section JS{
+    <script>
+        function UpdateIsActive(ID) {
+            $.get("/Licence/UpdateIsActive/" + ID, function (result) {
+                if (result) {
+                    toastr.success("Durum Aktif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+                else {
+                    toastr.error("Durum Pasif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+            })
+        }
+    </script>
+}

@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewBag.Title = "Insert";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+@model List<Licence360.DAL.DB.LicenceTime>
+<div class="card">
+    <div class="card-header">
+        <h5>Program Ekleme</h5>
+    </div>
+    <div class="card-body">
+        <div class="col-12 row">
+            <div class="col-6">
+                <label class="form-label">Program Adı</label>
+                <input id="ProductName" type="text" class="form-control">
+            </div>
+            <div class="col-6">
+                <label class="form-label">Lisans Süresi</label>
+                <select class="form-control" id="LicenceTimeID">
+                    <option value="0">Lisans Süresi Seçiniz</option>
+                    @foreach (var item in Model)
+                    {
+                        <option value="@item.ID">@item.LicenceTimeName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <div class="col-12 mt-2">
+                <label class="form-label">Açıklama</label>
+                <textarea id="Description" class="form-control"></textarea>
+                <a onclick="ProductInsert()" class="btn btn-success mt-4 float-right" href="#">Kaydet</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section JS{
+    <script>
+        function ProductInsert() {
+            data = {
+                ProductName: $('#ProductName').val(),
+                LicenceTimeID: $('#LicenceTimeID').val(),
+                Description: $('#Description').val(),
+                IsActive: true
+            }
+            if (data.ProductName != "") {
+                if (data.LicenceTimeID != 0) {
+                    $.ajax({
+                        url: '/Product/InsertProduct',
+                        type: 'post',
+                        data: data,
+                        success: function (result) {
+                            if (result == true) {
+
+                                toastr.success('Ekleme İşlemi Başarılı', 'Başarılı')
+                                setInterval(function () {
+                                    window.location.replace('/Product/Index')
+
+                                }, 2000)
+                            }
+                            else {
+                                toastr.error('İşlem Başarısız!!!', 'Hata')
+                            }
+                        }
+                    })
+                }
+                else {
+                    toastr.warning('Lisans Süresi Boş Geçilemez!!!', 'Hata')
+                }
+            }
+            else {
+                toastr.warning('Program Adı Boş Geçilemez!!!', 'Hata')
+            }
+        }
+    </script>
+}

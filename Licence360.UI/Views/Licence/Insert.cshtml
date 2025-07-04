@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewBag.Title = "Insert";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+@model Licence360.UI.Models.LicenceVM
+<div class="card">
+    <div class="card-header">
+        <h5>Lisans Ekleme</h5>
+    </div>
+    <div class="card-body">
+        <div class="col-12 row">
+            <div class="col-6">
+                <label class="form-label">Müşteri Firma Adı</label>
+                <select class="form-control" id="CustomerID" required>
+                    <option value="0">Lütfen Müşteri Seçiniz</option>
+                    @foreach (var item in Model.CustomerList)
+                    {
+                        <option value="@item.ID">@item.CompanyName</option>
+                    }
+                </select>
+
+            </div>
+            <div class="col-6">
+                <label class="form-label">Program Adı</label>
+                <select onchange="DateCalculation()" class="form-control" id="ProductID" required>
+                    <option value="0">Lütfen Program Seçiniz</option>
+                    @foreach (var item in Model.ProductList)
+                    {
+                        <option value="@item.ID">@item.ProductName + @item.LicenceTime.LicenceTimeName Ay</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <div class="col-6">
+                <label class="form-label">Başlangıç Tarihi</label>
+                <input type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control" id="StartDate">
+            </div>
+            <div class="col-6">
+                <label class="form-label">Bitiş Tarihi</label>
+                <input type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control" id="EndDate">
+            </div>
+            <div class="col-12 mt-2">
+                <label class="form-label">URL</label>
+                <textarea class="form-control" id="CustomerURL"></textarea>
+                <a onclick="CustomerLicenceInsert()" class="btn btn-success mt-4 float-right" href="#">Kaydet</a>
+            </div>
+        </div>
+        <label id="localDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" hidden></label>
+    </div>
+</div>
+
+@section JS{
+    <script>
+        function CustomerLicenceInsert() {
+            data = {
+                ProductID: $('#ProductID').val(),
+                CustomerID: $('#CustomerID').val(),
+                StartDate: $('#StartDate').val(),
+                EndDate: $('#EndDate').val(),
+                CustomerURL: $('#CustomerURL').val(),
+                IsActive: true
+            }
+            //var mm = data.EndDate.split('-')[1]
+            //var yy = data.EndDate.split('-')[0]
+
+            var locald = $('#localDate').val()
+            //mmm = locald.split('-')[1]
+            //var yyy = locald.split('-')[0]
+
+
+
+            if (data.CustomerID != 0) {
+                if (data.ProductID != 0) {
+                    if (data.EndDate != locald) {
+                        if (data.CustomerURL != "") {
+                            $.ajax({
+                                url: '/Customer/InsertCustomerProduct',
+                                type: 'post',
+                                data: data,
+                                success: function (result) {
+                                    if (result == true) {
+
+                                        toastr.success('Ekleme İşlemi Başarılı', 'Başarılı')
+                                        setInterval(function () {
+                                            window.location.replace('/Licence/Index')
+
+                                        }, 2000)
+                                    }
+                                    else {
+                                        toastr.error('İşlem Başarısız!!!', 'Hata')
+                                    }
+                                }
+                            })
+                        }
+                        else {
+                            toastr.warning('URL Boş Geçilemez')
+                        }
+                    }
+                    else {
+                        toastr.warning('Bitiş Tarihini Kontrol Ediniz')
+                    }
+                }
+                else {
+                    toastr.warning('Program Adı Boş Geçilemez')
+                }
+            }
+            else {
+                toastr.warning('Firma Adı Boş Geçilemez')
+            }
+        }
+        ///Program Seçimine Göre Otomatik Tarih İnputunu Düzeltiyor
+        function DateCalculation() {
+            var licenceTime = $('#ProductID option:selected').text();
+            if (licenceTime.includes('+')) {
+
+                var licenceTimeName = $('#ProductID option:selected').text().split('+')[1].split(' ')[1];
+
+                var simdi = new Date();
+                simdi.setMonth(simdi.getMonth() + parseInt(licenceTimeName));
+                var yil = simdi.getFullYear();
+                var ay = String(simdi.getMonth() + 1).padStart(2, '0');
+                var gun = String(simdi.getDate()).padStart(2, '0');
+                var formatliTarih = `${yil}-${ay}-${gun}`;
+                $('#EndDate').val(formatliTarih);
+
+                $('#StartDate').attr("disabled", "disabled");
+                $('#EndDate').attr("disabled", "disabled");
+                $('#StartDate').addClass("border-info is-valid");
+                $('#EndDate').addClass("border-info is-valid");
+            }
+            else {
+                $('#StartDate').removeAttr("disabled", "disabled");
+                $('#EndDate').removeAttr("disabled", "disabled");
+                $('#StartDate').removeClass("border-info is-valid");
+                $('#EndDate').removeClass("border-info is-valid");
+            }
+
+        }
+    </script>
+}

@@ -1,0 +1,196 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+
+@model List<Licence360.DAL.DB.Customer>
+
+<div class="card">
+    <div class="card-header">
+        <h5>
+            Müşteri Listesi
+        </h5>
+    </div>
+    <div class="mr-3 ml-3">
+        <table id="myTable" class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Firma Adı</th>
+                    <th>Müşteri Adı</th>
+                    <th>Telefon</th>
+                    <th>E-Posta</th>
+                    <th>Durumu</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ID</td>
+                        <td>@item.CompanyName</td>
+                        <td>@item.AuthPerson</td>
+                        <td>@item.Phone</td>
+                        <td>@item.Email</td>
+                        <td>
+                            @if (item.IsActive == true)
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-success">Aktif</span></a>
+                            }
+                            else
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-danger">Pasif</span></a>
+                            }
+                        </td>
+                        <td>
+                            <a data-toggle="modal" data-target="#modal-default" onclick="UpdateModal(@item.ID)" class="btn btn-warning btn-sm text-white" href="#"><i class="fa fa-edit"></i> Güncelle</a>
+                            <a class="btn btn-primary btn-sm" href="/Customer/Detail/@item.ID"><i class="fa fa-search"></i> Detay</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="modal fade" id="modal-default">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Müşteri Güncelle</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-12 row">
+                            <div class="col-6">
+                                <label class="form-label">Firma Adı</label>
+                                <input id="companyName" type="text" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Yetkili Kişi</label>
+                                <input id="authPerson" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-12 row mt-2">
+                            <div class="col-6">
+                                <label class="form-label">Telefon</label>
+                                <input id="phone" type="text" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">E-Posta</label>
+                                <input id="email" type="text" class="form-control">
+                            </div>
+                            <div class="col-12 mt-2">
+                                <label class="form-label">Adres</label>
+                                <textarea id="address" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <a class="btn btn-default" data-dismiss="modal">Kapat</a>
+                        @*Gelen ID burada tutuluyor*@
+                        <input type="text" id="ID" hidden />
+                        <a onclick="CustomerUpdate()" class="btn btn-warning text-white">Güncelle</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+@section JS{
+    <script>
+        function UpdateIsActive(ID) {
+            $.get("/Customer/UpdateIsActive/" + ID, function (result) {
+                if (result) {
+                    toastr.success("Durum Aktif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+                else {
+                    toastr.error("Durum Pasif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+            })
+        }
+        function UpdateModal(ID) {
+            $.get('/Customer/UpdateModal/' + ID, function (result) {
+                if (result != false) {
+                    $('#companyName').val(result.companyName)
+                    $('#authPerson').val(result.authPerson)
+                    $('#phone').val(result.phone)
+                    $('#email').val(result.email)
+                    $('#address').html(result.address)
+                    $('#ID').val(result.ID)
+                }
+                else {
+                    toastr.error('Kullanıcı Bulunamadı')
+                    setInterval(function () {
+                        window.location.replace('/Customer/Index')
+                    }, 2000)
+                }
+            });
+        }
+        function CustomerUpdate() {
+            data = {
+                companyName: $('#companyName').val(),
+                authPerson: $('#authPerson').val(),
+                phone: $('#phone').val(),
+                email: $('#email').val(),
+                address: $('#address').val(),
+                ID: $('#ID').val(),
+            }
+            if (data.companyName != '') {
+                if (data.authPerson != '') {
+                    if (data.phone != '') {
+                        if (data.email != '') {
+                            if (data.address != '') {
+                                $.ajax({
+                                    url: '/Customer/CustomerUpdate',
+                                    type: 'post',
+                                    data: data,
+                                    success: function (result) {
+                                        if (result == true) {
+
+                                            toastr.success('Ekleme İşlemi Başarılı', 'Başarılı')
+                                            setInterval(function () {
+                                                window.location.replace('/Customer/Index')
+
+                                            }, 2000)
+                                        }
+                                        else {
+                                            toastr.error('İşlem Başarısız!!!', 'Hata')
+                                        }
+                                    }
+                                })
+                            }
+                            else {
+                                toastr.warning('Adres Boş Geçilemez')
+                            }
+                        }
+                        else {
+                            toastr.warning('Email Boş Geçilemez')
+                        }
+                    }
+                    else {
+                        toastr.warning('Telefon Boş Geçilemez')
+                    }
+                }
+                else {
+                    toastr.warning('Yetkili Boş Geçilemez')
+                }
+            }
+            else {
+                toastr.warning('Firma Adı Boş Geçilemez')
+            }
+        }
+    </script>
+
+}

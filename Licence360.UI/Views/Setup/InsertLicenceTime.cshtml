@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewBag.Title = "InsertLicenceTime";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+@model List<Licence360.DAL.DB.LicenceTime>
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 mr-5 ml-3">
+                <div class="card">
+                    <div class="card-header m-1">
+                        <h5>
+                            Lisans Süresi Ekle
+                        </h5>
+                    </div>
+                    <div class="card-body row">
+                        <input type="number" class="form-control col-10" value="" id="LicenceTime" placeholder="Lütfen Ay Bazında Sayı Giriniz" /><h4 class="m-2"> AY</h4>
+                    </div>
+                    <a href="#" onclick="LicenceTimeInsert()" class="btn btn-success mt-3 float-right">Kaydet</a>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>
+                            Lisans Süresi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped text-center">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Süre(AY)</th>
+                                </tr>
+                            </thead>
+                            @foreach (var item in Model)
+                            {
+                                <tbody>
+                                    <tr>
+                                        <th>@item.ID</th>
+                                        <th>@item.LicenceTimeName</th>
+                                    </tr>
+                                </tbody>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section JS{
+    <script>
+        function LicenceTimeInsert() {
+            data = {
+                LicenceTimeName: $('#LicenceTime').val()
+            }
+            if (data.LicenceTime != "") {
+                $.ajax({
+                    url: '/Setup/InsertLicenceT',
+                    type: 'post',
+                    data: data,
+                    success: function (result) {
+                        if (result == true) {
+
+                            toastr.success('Ekleme İşlemi Başarılı', 'Başarılı')
+                            setInterval(function () {
+                                window.location.replace('/Setup/InsertLicenceTime')
+
+                            }, 2000)
+                        }
+                        else {
+                            toastr.error('İşlem Başarısız!!!', 'Hata')
+                        }
+                    }
+                })
+            }
+            else {
+                toastr.warning('Boş Geçilemez!!!', 'Hata')
+            }
+        }
+    </script>
+}

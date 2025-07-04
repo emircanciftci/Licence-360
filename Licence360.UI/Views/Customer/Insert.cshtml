@@ -1,0 +1,94 @@
+﻿@{
+    ViewBag.Title = "Insert";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h5>Müşteri Ekleme</h5>
+    </div>
+    <div class="card-body">
+        <div class="col-12 row">
+            <div class="col-6">
+                <label class="form-label">Firma Adı</label>
+                <input id="companyName" type="text" class="form-control">
+            </div>
+            <div class="col-6">
+                <label class="form-label">Yetkili Kişi</label>
+                <input id="authPerson" type="text" class="form-control">
+            </div>
+        </div>
+        <div class="col-12 row mt-2">
+            <div class="col-6">
+                <label class="form-label">Telefon</label>
+                <input id="phone" type="text" class="form-control">
+            </div>
+            <div class="col-6">
+                <label class="form-label">E-Posta</label>
+                <input id="email" type="text" class="form-control">
+            </div>
+            <div class="col-12 mt-2">
+                <label class="form-label">Adres</label>
+                <textarea id="address" class="form-control"></textarea>
+                <a onclick="CustomerInsert()" class="btn btn-success mt-4 float-right" href="#">Kaydet</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function CustomerInsert() {
+        data = {
+            companyName: $('#companyName').val(),
+            authPerson: $('#authPerson').val(),
+            phone: $('#phone').val(),
+            email: $('#email').val(),
+            address: $('#address').val(),
+            isActive: true,
+        }
+        if (data.companyName != '') {
+            if (data.authPerson != '') {
+                if (data.phone != '') {
+                    if (data.email != '') {
+                        if (data.addres != '') {
+                            $.ajax({
+                                url: '/Customer/Insertt',
+                                type: 'post',
+                                data: data,
+                                success: function (result) {
+                                    if (result == true) {
+
+                                        toastr.success('Ekleme İşlemi Başarılı', 'Başarılı')
+                                        setInterval(function () {
+                                            window.location.replace('/Customer/Index')
+
+                                        },2000)
+                                    }
+                                    else {
+                                        toastr.error('İşlem Başarısız!!!','Hata')
+                                    }
+                                }
+                            })
+                        }
+                        else {
+                            toastr.warning('Adres Boş Geçilemez')
+                        }
+                    }
+                    else {
+                        toastr.warning('Email Boş Geçilemez')
+                    }
+                }
+                else {
+                    toastr.warning('Telefon Boş Geçilemez')
+                }
+            }
+            else {
+                toastr.warning('Yetkili Boş Geçilemez')
+            }
+        }
+        else {
+            toastr.warning('Firma Adı Boş Geçilemez')
+        }
+    }
+</script>

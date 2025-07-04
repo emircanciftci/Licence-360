@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/LayoutPage.cshtml";
+}
+@model List<Licence360.DAL.DB.CustomerLicence>
+<div class="card col-12">
+    <div class="card-header">
+        <h5>
+            Lisans Listesi
+        </h5>
+    </div>
+    <div class="mr-3 ml-3">
+        <table id="myTable" class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Program Adı</th>
+                    <th>Firma Adı</th>
+                    <th>Başlangıç Tarihi</th>
+                    <th>Bitiş Tarihi</th>
+                    <th>URL</th>
+                    <th>Durumu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.ID</td>
+                        <td>@item.Product.ProductName + @item.Product.LicenceTime.LicenceTimeName Ay</td>
+                        <td>@item.Customer.CompanyName</td>
+                        <td>@item.StartDate.Value.ToShortDateString()</td>
+                        <td>@item.EndDate.Value.ToShortDateString()</td>
+                        <td>@item.CustomerURL</td>
+                        <td>
+                            @if (item.IsActive == true)
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-success">Aktif</span></a>
+                            }
+                            else
+                            {
+                                <a href="#" onclick="UpdateIsActive(@item.ID)"><span class="badge badge-danger">Pasif</span></a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@section JS{
+    <script>
+        function UpdateIsActive(ID) {
+            $.get("/Licence/UpdateIsActive/" + ID, function (result) {
+                if (result) {
+                    toastr.success("Durum Aktif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+                else {
+                    toastr.error("Durum Pasif olarak değiştirildi", "İşlem Başarılı");
+                    setInterval(function () {
+                        window.location.reload()
+                    }, 2000)
+                }
+            })
+        }
+    </script>
+}
